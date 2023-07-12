@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlparse, parse_qs, unquote
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # Define the path to the playlist.json file
@@ -35,18 +36,18 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path.startswith('/playlist'):
-            query_params = self.path.split('?')
+            parsed_url = urlparse(self.path)
+            query_params = parse_qs(parsed_url.query)
             filters = {}
-            if len(query_params) > 1:
-                query_params = query_params[1].split('&')
-                for param in query_params:
-                    key, value = param.split('=')
-                    filters[key] = value
+            for param, values in query_params.items():
+                decoded_param = unquote(param)
+                decoded_values = [unquote(value).lower() for value in values]
+                filters[decoded_param] = decoded_values
 
             filtered_data = normalized_data
-            for prop, value in filters.items():
+            for prop, values in filters.items():
                 filtered_data = [
-                    item for item in filtered_data if item.get(prop) == value
+                    item for item in filtered_data if item.get(prop).lower() in values
                 ]
 
             self.set_response()
