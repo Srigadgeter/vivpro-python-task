@@ -12,8 +12,9 @@ with open(json_file) as file:
 
     properties = list(data.keys())
 
-    for i in range(len(data['id'].keys())):
+    for i in range(len(data['id'])):
         item = {prop: data[prop][str(i)] for prop in properties}
+        item["index"] = i
         normalized_data.append(item)
     
     # print('normalized_data >>', normalized_data)
